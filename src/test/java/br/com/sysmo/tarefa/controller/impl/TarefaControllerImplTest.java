@@ -1,6 +1,5 @@
 package br.com.sysmo.tarefa.controller.impl;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -24,85 +23,106 @@ import br.com.sysmo.tarefa.service.TarefaService;
 @ExtendWith(SpringExtension.class)
 public class TarefaControllerImplTest {
 
-	
 	@Mock
-    private TarefaService tarefaService;
+	private TarefaService tarefaService;
 
-    @Mock
-    private TarefaRepository tarefaRepository;
-	
-    @InjectMocks
-    private TarefaControllerImpl tarefaControllerImpl;
-    
-    private Tarefa tarefaMock;
-    
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+	@Mock
+	private TarefaRepository tarefaRepository;
 
-        tarefaMock = new Tarefa();
-        tarefaMock.setCodigo(1L);
-        tarefaMock.setTitulo("Minha Tarefa");
-        tarefaMock.setDescricao("Descrição da Tarefa");
-        tarefaMock.setDataCriacao(LocalDate.now());
+	@InjectMocks
+	private TarefaControllerImpl tarefaControllerImpl;
 
-        when(tarefaRepository.findAllByOrderByCodigoAsc()).thenReturn(List.of(tarefaMock));
-        when(tarefaRepository.findByCodigo(1L)).thenReturn(Optional.of(tarefaMock));
-        when(tarefaService.salvar(any(Tarefa.class))).thenReturn(tarefaMock);
-        when(tarefaRepository.existsById(1L)).thenReturn(true);
-        when(tarefaRepository.existsById(99L)).thenReturn(false);
-        doNothing().when(tarefaService).excluir(1L);
-    }
+	private Tarefa tarefaMock;
 
-    @Test
-    void buscarListaTarefa_DeveRetornarListaDeTarefas() {
-        List<Tarefa> resultado = tarefaControllerImpl.buscarListaTarefa();
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
 
-        assertNotNull(resultado);
-        assertEquals(1, resultado.size());
-        assertEquals("Minha Tarefa", resultado.get(0).getTitulo());
-    }
+		tarefaMock = new Tarefa();
+		tarefaMock.setCodigo(1L);
+		tarefaMock.setTitulo("Minha Tarefa");
+		tarefaMock.setDescricao("Descrição da Tarefa");
+		tarefaMock.setDataCriacao(LocalDate.now());
 
-    @Test
-    void registrar_DeveSalvarETarefaERetornarOk() {
+	}
+
+	@Test
+	void buscarListaTarefa_DeveRetornarListaDeTarefas() {
+		when(tarefaRepository.findAllByOrderByCodigoAsc()).thenReturn(List.of(tarefaMock));
+
+		List<Tarefa> resultado = tarefaControllerImpl.buscarListaTarefa();
+
+		assertNotNull(resultado);
+		assertEquals(1, resultado.size());
+		assertEquals("Minha Tarefa", resultado.get(0).getTitulo());
+	}
+
+	@Test
+	void registrar_DeveSalvarETarefaERetornarOk() {
+		when(tarefaService.salvar(any(Tarefa.class))).thenReturn(tarefaMock);
+
+		ResponseEntity<Tarefa> resposta = tarefaControllerImpl.registrar(tarefaMock);
+
+		assertNotNull(resposta);
+		assertEquals(200, resposta.getStatusCode().value());
+		assertEquals("Minha Tarefa", resposta.getBody().getTitulo());
+	}
+
+	@Test
+    void registrar_DeveDefinirDataCriacaoQuandoNula() {
+    	
+    	tarefaMock.setDataCriacao(null);
+    	
+    	when(tarefaService.salvar(any(Tarefa.class))).thenReturn(tarefaMock);
+    	
         ResponseEntity<Tarefa> resposta = tarefaControllerImpl.registrar(tarefaMock);
 
         assertNotNull(resposta);
         assertEquals(200, resposta.getStatusCode().value());
         assertEquals("Minha Tarefa", resposta.getBody().getTitulo());
+        assertNotNull(resposta.getBody().getDataCriacao());
     }
 
-    @Test
-    void buscarTarefa_DeveRetornarTarefa_QuandoExiste() {
-        ResponseEntity<Tarefa> resposta = tarefaControllerImpl.buscarTarefa(1L);
+	@Test
+	void buscarTarefa_DeveRetornarTarefa_QuandoExiste() {
+		when(tarefaRepository.findByCodigo(1L)).thenReturn(Optional.of(tarefaMock));
 
-        assertNotNull(resposta);
-        assertEquals(200, resposta.getStatusCode().value());
-        assertEquals("Minha Tarefa", resposta.getBody().getTitulo());
-    }
+		ResponseEntity<Tarefa> resposta = tarefaControllerImpl.buscarTarefa(1L);
 
-    @Test
-    void buscarTarefa_DeveRetornarNotFound_QuandoNaoExiste() {
-        ResponseEntity<Tarefa> resposta = tarefaControllerImpl.buscarTarefa(99L);
+		assertNotNull(resposta);
+		assertEquals(200, resposta.getStatusCode().value());
+		assertEquals("Minha Tarefa", resposta.getBody().getTitulo());
+	}
 
-        assertNotNull(resposta);
-        assertEquals(404, resposta.getStatusCode().value());
-    }
+	@Test
+	void buscarTarefa_DeveRetornarNotFound_QuandoNaoExiste() {
+		when(tarefaRepository.findByCodigo(99L)).thenReturn(Optional.empty());
 
-    @Test
-    void excluirTarefa_DeveExcluirTarefaERetornarNoContent() {
-        ResponseEntity<Void> resposta = tarefaControllerImpl.excluirTarefa(1L);
+		ResponseEntity<Tarefa> resposta = tarefaControllerImpl.buscarTarefa(99L);
 
-        assertEquals(204, resposta.getStatusCode().value());
-        verify(tarefaService, times(1)).excluir(1L);
-    }
+		assertNotNull(resposta);
+		assertEquals(404, resposta.getStatusCode().value());
+	}
 
-    @Test
-    void excluirTarefa_DeveRetornarNotFound_QuandoNaoExiste() {
-        ResponseEntity<Void> resposta = tarefaControllerImpl.excluirTarefa(99L);
+	@Test
+	void excluirTarefa_DeveExcluirTarefaERetornarNoContent() {
+		when(tarefaRepository.existsById(1L)).thenReturn(true);
+		doNothing().when(tarefaService).excluir(1L);
 
-        assertEquals(404, resposta.getStatusCode().value());
-        verify(tarefaService, never()).excluir(99L);
-    }
-    
+		ResponseEntity<Void> resposta = tarefaControllerImpl.excluirTarefa(1L);
+
+		assertEquals(204, resposta.getStatusCode().value());
+		verify(tarefaService, times(1)).excluir(1L);
+	}
+
+	@Test
+	void excluirTarefa_DeveRetornarNotFound_QuandoNaoExiste() {
+		when(tarefaRepository.existsById(99L)).thenReturn(false);
+
+		ResponseEntity<Void> resposta = tarefaControllerImpl.excluirTarefa(99L);
+
+		assertEquals(404, resposta.getStatusCode().value());
+		verify(tarefaService, never()).excluir(99L);
+	}
+
 }
