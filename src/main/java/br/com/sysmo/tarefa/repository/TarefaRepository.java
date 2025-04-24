@@ -10,5 +10,5 @@ import br.com.sysmo.tarefa.model.Tarefa;
 public interface TarefaRepository extends JpaRepository<Tarefa, Long>{
 
 	public List<Tarefa> findAllByOrderByCodigoAsc();
-	Optional<Tarefa> findByCodigo(Long codigo);
+	public Optional<Tarefa> findByCodigo(Long codigo);
 }

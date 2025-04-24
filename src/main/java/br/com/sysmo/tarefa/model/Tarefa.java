@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -30,6 +32,10 @@ public class Tarefa {
 
 	@Column(name = "data_criacao", nullable = false)
 	private LocalDate dataCriacao;
+
+	@ManyToOne
+	@JoinColumn(name = "codigo_colaborador")
+	private Colaborador colaborador;
 
 	public Long getCodigo() {
 		return codigo;
@@ -69,6 +75,14 @@ public class Tarefa {
 
 	public void setDataCriacao(LocalDate dataCriacao) {
 		this.dataCriacao = dataCriacao;
+	}
+
+	public Colaborador getColaborador() {
+		return colaborador;
+	}
+
+	public void setColaborador(Colaborador colaborador) {
+		this.colaborador = colaborador;
 	}
 
 }

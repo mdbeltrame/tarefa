@@ -51,13 +51,17 @@ public class JwtFilter extends OncePerRequestFilter{
 	private String extractToken(HttpServletRequest request) {
 	    String header = request.getHeader("Authorization");
 	    if (header == null) {
-	        header = request.getHeader("authorization"); // Adiciona verificação para o cabeçalho em minúsculas
+	    	// Adiciona verificação para o cabeçalho em minúsculas
+	        header = request.getHeader("authorization");
 	    }
 	    
-	    logger.debug("Header Authorization: {}", header); // Log para verificar o cabeçalho
+	    // Log para verificar o cabeçalho
+	    logger.debug("Header Authorization: {}", header); 
 	    if (header != null && header.startsWith("Bearer ")) {
-	        System.out.println("Token recebido: " + header.substring(7)); // Verifique o token extraído
-	        return header.substring(7);  // Retorna o token sem o "Bearer "
+	    	// Verifique o token extraído
+	        System.out.println("Token recebido: " + header.substring(7)); 
+	        // Retorna o token sem o "Bearer "
+	        return header.substring(7);
 	    }
 	    return null;
 	}

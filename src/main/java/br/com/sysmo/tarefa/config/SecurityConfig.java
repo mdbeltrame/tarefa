@@ -44,6 +44,7 @@ public class SecurityConfig{
 	            .requestMatchers(SWAGGER_WHITELIST).permitAll()
 	            .requestMatchers("/usuario/registrar", "/usuario/login").permitAll()
 	            .requestMatchers("/tarefa/**").authenticated()
+	            .requestMatchers("/colaborador/**").authenticated()
 	            .anyRequest().authenticated()
 	        )
 	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
